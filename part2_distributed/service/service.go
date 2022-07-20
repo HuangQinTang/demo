@@ -12,7 +12,7 @@ import (
 func Start(ctx context.Context, reg registry.Registration, host, port string, registerHandlersFun func()) (context.Context, error) {
 	registerHandlersFun()
 	ctx = startService(ctx, reg.ServiceName, host, port)
-	err := registry.RegisterService(reg) //注册服务
+	err := registry.RegisterService(reg) //服务注册
 	if err != nil {
 		return ctx, err
 	}
@@ -26,8 +26,13 @@ func startService(ctx context.Context, serviceName registry.ServiceName, host, p
 	srv.Addr = host + ":" + port
 
 	go func() {
-		//服务挂了 cancel()
+		//服务挂了或者关闭服务器时 -> 取消服务注册，执行cancel()
 		log.Printf("%v %s", srv.ListenAndServe(), serviceName)
+		err := registry.ShutdownService(fmt.Sprintf("http://%s:%s", host, port))
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("cancel service registry success.")
 		cancel()
 	}()
 
