@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"example/part2_distributed/log"
+	"example/part2_distributed/registry"
 	"example/part2_distributed/service"
 	"fmt"
 	stlog "log"
@@ -11,7 +12,13 @@ import (
 func main() {
 	log.Run("./distributed.log")
 	host, port := "localhost", "4000"
-	ctx, err := service.Start(context.Background(), "Log service", host, port, log.RegisterHandlers)
+	serviceAddress := fmt.Sprintf("http://%s:%s", host, port)
+
+	reg := registry.Registration{
+		ServiceName: "Log Service",
+		ServiceUrl:  serviceAddress,
+	}
+	ctx, err := service.Start(context.Background(), reg, host, port, log.RegisterHandlers)
 	if err != nil {
 		stlog.Fatalln(err)
 	}

@@ -2,19 +2,24 @@ package service
 
 import (
 	"context"
+	"example/part2_distributed/registry"
 	"fmt"
 	"log"
 	"net/http"
 )
 
 // Start 启动服务
-func Start(ctx context.Context, serviceName, host, port string, registerHandlersFun func()) (context.Context, error) {
+func Start(ctx context.Context, reg registry.Registration, host, port string, registerHandlersFun func()) (context.Context, error) {
 	registerHandlersFun()
-	ctx = startService(ctx, serviceName, host, port)
+	ctx = startService(ctx, reg.ServiceName, host, port)
+	err := registry.RegisterService(reg) //注册服务
+	if err != nil {
+		return ctx, err
+	}
 	return ctx, nil
 }
 
-func startService(ctx context.Context, serviceName, host, port string) context.Context {
+func startService(ctx context.Context, serviceName registry.ServiceName, host, port string) context.Context {
 	ctx, cancel := context.WithCancel(ctx)
 
 	var srv http.Server
