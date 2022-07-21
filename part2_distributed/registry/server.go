@@ -10,7 +10,7 @@ import (
 )
 
 const ServerPort = ":3000"
-const ServicesUrl = "http://localhost" + ServerPort + "/services"
+const ServicesUrl = "http://localhost" + ServerPort + "/services" //服务注册http服务地址，Post请求表示注册,Delete请求取消注册
 
 type registry struct {
 	registrations []Registration //已注册的服务
@@ -18,7 +18,7 @@ type registry struct {
 }
 
 var reg = registry{
-	registrations: make([]Registration, 0),
+	registrations: make([]Registration, 0), //注册服务请求参数结构体
 	mutex:         new(sync.Mutex),
 }
 

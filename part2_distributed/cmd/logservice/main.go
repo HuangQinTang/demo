@@ -9,13 +9,14 @@ import (
 	stlog "log"
 )
 
+//日志服务 server
 func main() {
 	log.Run("./distributed.log")
 	host, port := "localhost", "4000"
 	serviceAddress := fmt.Sprintf("http://%s:%s", host, port)
 
 	reg := registry.Registration{
-		ServiceName: "Log Service",
+		ServiceName: registry.LogService,
 		ServiceUrl:  serviceAddress,
 	}
 	ctx, err := service.Start(context.Background(), reg, host, port, log.RegisterHandlers)
@@ -23,5 +24,5 @@ func main() {
 		stlog.Fatalln(err)
 	}
 	<-ctx.Done()
-	fmt.Println("Shutting down log service.")
+	fmt.Printf("Shutting down %s.\n", registry.LogService)
 }

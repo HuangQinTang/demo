@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// RegisterService 注册服务
+// RegisterService 服务注册
 func RegisterService(r Registration) error {
 	buf := new(bytes.Buffer)
 	enc := json.NewEncoder(buf)
@@ -16,6 +16,7 @@ func RegisterService(r Registration) error {
 		return err
 	}
 
+	//
 	res, err := http.Post(ServicesUrl, "application/json", buf)
 	if err != nil {
 		return err
