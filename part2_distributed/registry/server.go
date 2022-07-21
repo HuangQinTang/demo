@@ -51,7 +51,7 @@ func (r *registry) sendRequiredServices(reg Registration) error {
 		}
 	}
 
-	//通知客户端当前服务中心情况
+	//通知客户端他所需要依赖的服务地址
 	err := r.sendPatch(p, reg.ServiceUpdateURL)
 	if err != nil {
 		return err
