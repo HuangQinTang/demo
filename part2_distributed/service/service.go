@@ -24,6 +24,7 @@ func startService(ctx context.Context, serviceName registry.ServiceName, host, p
 
 	var srv http.Server
 	srv.Addr = host + ":" + port
+	srv.Handler = nil	//DefaultServeMux(相当于路由器)
 
 	go func() {
 		//服务挂了或者关闭服务器时 -> 取消服务注册，执行cancel()

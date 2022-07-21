@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// 注册服务server
+// 服务中心 server（注册服务，取消注册服务）
 func main() {
 	http.Handle("/services", &registry.RegistryService{})
 	ctx, cancel := context.WithCancel(context.Background())

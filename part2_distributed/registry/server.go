@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,13 +14,13 @@ const ServerPort = ":3000"
 const ServicesUrl = "http://localhost" + ServerPort + "/services" //服务注册http服务地址，Post请求表示注册,Delete请求取消注册
 
 type registry struct {
-	registrations []Registration //已注册的服务
-	mutex         *sync.Mutex
+	registrations []Registration //保存已注册的服务
+	mutex         *sync.RWMutex
 }
 
 var reg = registry{
-	registrations: make([]Registration, 0), //注册服务请求参数结构体
-	mutex:         new(sync.Mutex),
+	registrations: make([]Registration, 0),
+	mutex:         new(sync.RWMutex),
 }
 
 // add 添加服务
@@ -27,7 +28,46 @@ func (r *registry) add(reg Registration) error {
 	r.mutex.Lock()
 	r.registrations = append(r.registrations, reg)
 	r.mutex.Unlock()
+	err := r.sendRequiredServices(reg)
 	log.Printf("sucess add server %s, now tataol %d\n", reg.ServiceName, len(r.registrations))
+	return err
+}
+
+// sendRequiredServices 添加依赖服务
+func (r *registry) sendRequiredServices(reg Registration) error {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	//在当前已在服务中心的注册的服务中寻找要依赖的服务
+	var p patch
+	for _, serviceReg := range r.registrations {
+		for _, reqService := range reg.RequiredServices {
+			if serviceReg.ServiceName == reqService {
+				p.Added = append(p.Added, patchEntry{
+					Name: serviceReg.ServiceName,
+					URL:  serviceReg.ServiceUrl,
+				})
+			}
+		}
+	}
+
+	//通知客户端当前服务中心情况
+	err := r.sendPatch(p, reg.ServiceUpdateURL)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r registry) sendPatch(p patch, url string) error {
+	d, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
+	_, err = http.Post(url, "application/json", bytes.NewBuffer(d))
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -46,6 +86,7 @@ func (r *registry) remove(url string) error {
 	return fmt.Errorf("Service at URL %s not found", url)
 }
 
+// RegistryService 服务中心http.Handler
 type RegistryService struct{}
 
 func (s RegistryService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
