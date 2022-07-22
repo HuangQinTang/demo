@@ -26,7 +26,7 @@ func main() {
 			registry.GradingService,
 		},
 		ServiceUpdateURL: serviceAddress + "/services",
-		//HeartbeatURL: serviceAddress + "/heartbeat",
+		HeartbeatURL:     serviceAddress + "/heartbeat",
 	}
 
 	ctx, err := service.Start(context.Background(),
@@ -37,9 +37,10 @@ func main() {
 	if err != nil {
 		stlog.Fatal(err)
 	}
-	if logProvider, err := registry.GetProvider(registry.LogService); err != nil {
+	if logProvider, err := registry.GetProvider(registry.LogService); err == nil {
+		fmt.Printf("Logging service found at: %s\n", logProvider)
 		log.SetClientLogger(logProvider[0], r.ServiceName)
 	}
-	<- ctx.Done()
+	<-ctx.Done()
 	fmt.Println("Shutting down portal.")
 }

@@ -6,6 +6,7 @@ type Registration struct {
 	ServiceUrl       string        `json:"service_url"`  //服务url
 	RequiredServices []ServiceName //当前服务所依赖的其他服务
 	ServiceUpdateURL string        //服务中心回调本服务地址
+	HeartbeatURL     string        //心跳地址
 }
 
 type ServiceName string

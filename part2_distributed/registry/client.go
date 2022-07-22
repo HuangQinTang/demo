@@ -12,13 +12,21 @@ import (
 
 // RegisterService 服务注册
 func RegisterService(r Registration) error {
-	//解析回调地址url用以获取path
-	ServiceUpdateURL, err := url.Parse(r.ServiceUpdateURL)
+	//注册回调地址api,用以接收服务中心通知
+	serviceUpdateURL, err := url.Parse(r.ServiceUpdateURL)
 	if err != nil {
 		return err
 	}
-	//注册回调地址api,用以接收服务中心通知
-	http.Handle(ServiceUpdateURL.Path, &serviceUpdateHanlder{})
+	http.Handle(serviceUpdateURL.Path, &serviceUpdateHanlder{})
+
+	//注册回调心跳地址api,用以保持心跳
+	heartBeatURL, err := url.Parse(r.HeartbeatURL)
+	if err != nil {
+		return err
+	}
+	http.HandleFunc(heartBeatURL.Path, func (w http.ResponseWriter, r *http.Request)  {
+		w.WriteHeader(http.StatusOK)	//生成环境心跳可能包含内存,cpu等信息
+	})
 
 	buf := new(bytes.Buffer)
 	enc := json.NewEncoder(buf)

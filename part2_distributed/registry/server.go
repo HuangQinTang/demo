@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 const ServerPort = ":3000"
@@ -183,5 +184,46 @@ func (s RegistryService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
+	}
+}
+
+var once sync.Once
+
+func SetupRegistryService() {
+	once.Do(func() {
+		go reg.heartbeat(3 * time.Second) //三秒检查一次心跳
+	})
+}
+
+func (r *registry) heartbeat(freq time.Duration) {
+	for {
+		var wg sync.WaitGroup
+		for _, reg := range r.registrations {
+			wg.Add(1)
+			go func(reg Registration) {
+				defer wg.Done()
+				success := true
+				for attemps := 0; attemps < 3; attemps++ {		//失败重试3次
+					res, err := http.Get(reg.HeartbeatURL)
+					if err != nil {
+						log.Println(err)
+					} else if res.StatusCode == http.StatusOK {
+						log.Printf("Heartbeat check passed for %v", reg.ServiceName)
+						if !success {
+							r.add(reg)
+						}
+						break
+					}
+					log.Printf("Heartbeat check failed for %v", reg.ServiceName)
+					if success {
+						success = false
+						r.remove(reg.ServiceUrl)
+					}
+					time.Sleep(1 * time.Second)
+				}
+			}(reg)
+			wg.Wait()
+			time.Sleep(freq)
+		}
 	}
 }
