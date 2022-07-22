@@ -72,7 +72,7 @@ func (suh serviceUpdateHanlder) ServeHTTP(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("Updated received %v\n", p)
+	fmt.Printf("Updated received %#v\n", p)
 	prov.Update(p)	//重新维护当前服务依赖
 }
 

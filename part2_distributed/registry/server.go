@@ -25,10 +25,21 @@ var reg = registry{
 
 // add 添加服务
 func (r *registry) add(reg Registration) error {
+	//添加注册服务信息
 	r.mutex.Lock()
 	r.registrations = append(r.registrations, reg)
 	r.mutex.Unlock()
+
+	//通知被注册服务其依赖服务信息
 	err := r.sendRequiredServices(reg)
+
+	//如果服务中心内的服务有需要用到当前服务的，发送通知
+	r.notify(patch{
+		Added: []patchEntry{{
+			Name: reg.ServiceName,
+			URL:  reg.ServiceUrl,
+		}},
+	})
 	log.Printf("sucess add server %s, now tataol %d\n", reg.ServiceName, len(r.registrations))
 	return err
 }
@@ -59,6 +70,40 @@ func (r *registry) sendRequiredServices(reg Registration) error {
 	return nil
 }
 
+// notify 遍历服务中心内所有服务，如果依赖了fullPatch，则发送通知
+func (r registry) notify(fullPatch patch) {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	for _, reg := range r.registrations {
+		go func(reg Registration) {
+			for _, reqService := range reg.RequiredServices {
+				p := patch{Added: []patchEntry{}, Removed: []patchEntry{}}
+				sendUpdate := false //是否需要发送通知标志位,true需要
+				for _, added := range fullPatch.Added {
+					if added.Name == reqService {
+						p.Added = append(p.Added, added)
+						sendUpdate = true
+					}
+				}
+				for _, removed := range fullPatch.Removed {
+					if removed.Name == reqService {
+						p.Removed = append(p.Removed, removed)
+						sendUpdate = true
+					}
+				}
+				if sendUpdate {
+					err := r.sendPatch(p, reg.ServiceUpdateURL)
+					if err != nil {
+						log.Println(err)
+						return
+					}
+				}
+
+			}
+		}(reg)
+	}
+}
+
 func (r registry) sendPatch(p patch, url string) error {
 	d, err := json.Marshal(p)
 	if err != nil {
@@ -76,6 +121,18 @@ func (r *registry) remove(url string) error {
 	for i := 0; i < len(r.registrations); i++ {
 		if reg.registrations[i].ServiceUrl == url {
 			serviceName := reg.registrations[i].ServiceName
+
+			//通知服务中心内依赖当前服务的服务，当前服务已下线
+			r.notify(patch{
+				Removed: []patchEntry{
+					{
+						Name: r.registrations[i].ServiceName,
+						URL:  r.registrations[i].ServiceUrl,
+					},
+				},
+			})
+
+			//服务中心移除当前服务
 			r.mutex.Lock()
 			r.registrations = append(r.registrations[:i], r.registrations[i+1:]...)
 			r.mutex.Unlock()
