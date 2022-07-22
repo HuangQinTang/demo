@@ -14,6 +14,7 @@ type ServiceName string
 const (
 	LogService     = ServiceName("LogService")     //日志服务名
 	GradingService = ServiceName("GradingService") //学生信息服务名
+	PortalService  = ServiceName("PortalService")  //学生信息的web服务
 )
 
 //服务变更请求结构
@@ -23,6 +24,6 @@ type patchEntry struct {
 }
 
 type patch struct {
-	Added   []patchEntry	//增加的服务
-	Removed []patchEntry	//减少的服务
+	Added   []patchEntry //增加的服务
+	Removed []patchEntry //减少的服务
 }
