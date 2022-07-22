@@ -12,12 +12,12 @@ import (
 
 // RegisterService 服务注册
 func RegisterService(r Registration) error {
-	//解析url
+	//解析回调地址url用以获取path
 	ServiceUpdateURL, err := url.Parse(r.ServiceUpdateURL)
 	if err != nil {
 		return err
 	}
-	//
+	//注册回调地址api,用以接收服务中心通知
 	http.Handle(ServiceUpdateURL.Path, &serviceUpdateHanlder{})
 
 	buf := new(bytes.Buffer)
@@ -73,7 +73,7 @@ func (suh serviceUpdateHanlder) ServeHTTP(w http.ResponseWriter, r *http.Request
 		return
 	}
 	fmt.Printf("Updated received %v\n", p)
-	prov.Update(p)	//当前服务提供的api维护进服务提供者
+	prov.Update(p)	//重新维护当前服务依赖
 }
 
 // providers 服务提供者
@@ -87,7 +87,7 @@ var prov = providers{
 	mutex:    new(sync.RWMutex),
 }
 
-// Update 更新服务信息
+// Update 更新服务依赖
 func (p *providers) Update(pat patch) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()

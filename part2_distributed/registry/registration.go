@@ -10,6 +10,7 @@ type Registration struct {
 
 type ServiceName string
 
+// 服务名称，向服务提供者注册服务名称时，请定义在这；获取依赖服务时，也从这儿取
 const (
 	LogService     = ServiceName("LogService")     //日志服务名
 	GradingService = ServiceName("GradingService") //学生信息服务名

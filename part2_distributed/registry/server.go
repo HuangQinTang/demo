@@ -38,7 +38,7 @@ func (r *registry) sendRequiredServices(reg Registration) error {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	//在当前已在服务中心的注册的服务中寻找要依赖的服务
+	//从已在服务中心的注册的服务中寻找要依赖的服务是否存在
 	var p patch
 	for _, serviceReg := range r.registrations {
 		for _, reqService := range reg.RequiredServices {
