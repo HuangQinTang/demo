@@ -59,23 +59,44 @@ func (b *BeanFactoryImpl) Apply(bean interface{}) {
 			continue
 		}
 
-		//通过类型从容器中取值，如果容器中存在该类型的值，把该值反射赋予
-		if get_v := b.Get(field.Type); get_v != nil {
-			v.Field(i).Set(reflect.ValueOf(get_v))
-			continue
-		}
 		//表达式注入,依赖goft-expr包(https://github.com/shenyisyn/goft-expr)
-		if field.Tag.Get("inject") != "-" {
+		if field.Tag.Get("inject") != "-" { //会重新创建对象存入容器
 			ret := expr.BeanExpr(field.Tag.Get("inject"), b.ExprMap) //通过tag标签填写的表达式从 b.ExprMap获取该表达是对应的方法(定义在Config下)
 			if ret == nil && ret.IsEmpty() {                         //ExprMap取值为空不处理
 				continue
 			}
-			retValue := ret[0]   //约定，ExprMap里对应的方法只有一个放回置
+			retValue := ret[0]   //约定，ExprMap里对应的方法只有一个放对象
 			if retValue == nil { //值为空不处理
 				continue
 			}
 			b.Set(retValue)                           //把依赖也存入容器，二次获取时直接从容器取
 			v.Field(i).Set(reflect.ValueOf(retValue)) //反射赋值
+		} else { //inject:"-"时，直接从容器中寻找
+			//通过类型从容器中取值，如果容器中存在该类型的值，把该值反射赋予
+			if get_v := b.Get(field.Type); get_v != nil {
+				v.Field(i).Set(reflect.ValueOf(get_v))
+				continue
+			}
+		}
+
+	}
+}
+
+func (b *BeanFactoryImpl) Config(cfgs ...interface{}) {
+	for _, cfg := range cfgs {
+		t := reflect.TypeOf(cfg)
+		if t.Kind() != reflect.Ptr { //配置对象必须是指针对象
+			panic("required prt object")
+		}
+		b.Set(cfg)                       //将配置对象放入容器
+		b.ExprMap[t.Elem().Name()] = cfg //对象名作key 对象作Value，依赖注入时，根绝表达式(对象名.方法)，从这个map，取出对象的cfg
+		v := reflect.ValueOf(cfg)
+		for i := 0; i < t.NumMethod(); i++ { //遍历该配置对象方法（配置对象每个方法都会放回一个对象，这些对象是用到的依赖）
+			method := v.Method(i)
+			callRet := method.Call(nil)
+			if callRet != nil && len(callRet) == 1 { //预定配置对象方法只返回一个参数
+				b.Set(callRet[0].Interface()) //将配置对象方法里放回的对象注入容器
+			}
 		}
 	}
 }

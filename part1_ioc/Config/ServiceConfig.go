@@ -2,6 +2,7 @@ package Config
 
 import (
 	"example/part1_ioc/services"
+	"fmt"
 )
 
 type ServiceConfig struct {
@@ -12,5 +13,6 @@ func NewServiceConfig() *ServiceConfig {
 }
 
 func (s *ServiceConfig) OrderService() *services.OrderService {
+	fmt.Println("初始化")
 	return services.NewOrderService()
 }

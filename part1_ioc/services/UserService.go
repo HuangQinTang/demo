@@ -3,8 +3,7 @@ package services
 import "fmt"
 
 type UserService struct {
-	Order  *OrderService `inject:"ServiceConfig.OrderService()"`
-	Order2 *OrderService `inject:"-"`
+	Order  *OrderService `inject:"-"`
 }
 
 func NewUserService() *UserService {

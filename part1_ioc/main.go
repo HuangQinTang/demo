@@ -8,38 +8,16 @@ import (
 )
 
 func main() {
-	//放容器存值，再通过类型从容器取值
-	//BeanFactory.Set(services.NewOrderService())
-	//order := BeanFactory.Get((*services.OrderService)(nil))
-	//fmt.Printf("%T", order)
-
-
-	//非表达式注入获取对象(inject:"-")
-	//BeanFactory.Set(services.NewOrderService())
-	//userService := services.NewUserService()
-	//BeanFactory.Apply(userService)
-	//fmt.Println(userService.Order2)
-
-
-	//使用表达式的方式注入依赖(inject:"ServiceConfig.OrderService()")，需要在ExprMap维护表达式与对应的对象
-	//serviceConfig := Config.NewServiceConfig()
-	//BeanFactory.ExprMap = map[string]interface{}{
-	//	"ServiceConfig":serviceConfig,
-	//}
-	//userService := services.NewUserService()
-	//BeanFactory.Apply(userService)
-	//fmt.Println(userService.Order)
-
-	serviceConfig := Config.NewServiceConfig()
-	BeanFactory.ExprMap = map[string]interface{}{
-		"ServiceConfig":serviceConfig,
-	}
+	serviceConfig := Config.NewServiceConfig() //获取配置对象，配置对象的各方法名为要存入容器的对象名，方法返回值为要存入容器的对象（约定一个方法返回一个值）
+	BeanFactory.Config(serviceConfig)          //循环执行配置对象各方法，将方法名，方法返回的对象映射到容器中，用以后续依赖注入时，直接从容器中获取
 	{
+		//tag inject:"-"，单例直接从容器中取
 		userService := services.NewUserService()
-		BeanFactory.Apply(userService)
+		BeanFactory.Apply(userService) //注入依赖
 		fmt.Println(userService.Order)
 	}
 	{
+		//tag带表达式,多例,重新示例化依赖对象放入容器
 		adminService := services.NewAdminService()
 		BeanFactory.Apply(adminService)
 		fmt.Println(adminService.Order)
