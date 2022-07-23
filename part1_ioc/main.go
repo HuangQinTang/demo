@@ -22,11 +22,26 @@ func main() {
 
 
 	//使用表达式的方式注入依赖(inject:"ServiceConfig.OrderService()")，需要在ExprMap维护表达式与对应的对象
+	//serviceConfig := Config.NewServiceConfig()
+	//BeanFactory.ExprMap = map[string]interface{}{
+	//	"ServiceConfig":serviceConfig,
+	//}
+	//userService := services.NewUserService()
+	//BeanFactory.Apply(userService)
+	//fmt.Println(userService.Order)
+
 	serviceConfig := Config.NewServiceConfig()
 	BeanFactory.ExprMap = map[string]interface{}{
 		"ServiceConfig":serviceConfig,
 	}
-	userService := services.NewUserService()
-	BeanFactory.Apply(userService)
-	fmt.Println(userService.Order)
+	{
+		userService := services.NewUserService()
+		BeanFactory.Apply(userService)
+		fmt.Println(userService.Order)
+	}
+	{
+		adminService := services.NewAdminService()
+		BeanFactory.Apply(adminService)
+		fmt.Println(adminService.Order)
+	}
 }

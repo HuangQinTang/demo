@@ -1,6 +1,8 @@
 package Config
 
-import "example/part1_ioc/services"
+import (
+	"example/part1_ioc/services"
+)
 
 type ServiceConfig struct {
 }

@@ -1,7 +1,6 @@
 package Injector
 
 import (
-	"fmt"
 	"github.com/shenyisyn/goft-expr/src/expr"
 	"reflect"
 )
@@ -56,21 +55,27 @@ func (b *BeanFactoryImpl) Apply(bean interface{}) {
 	}
 	for i := 0; i < v.NumField(); i++ { //遍历结构体字段
 		field := v.Type().Field(i)
+		if !v.Field(i).CanSet() || field.Tag.Get("inject") == "" { //字段不能访问的(首字母非大写)，不存在指定tag(约定为inject)，不进行依赖注入
+			continue
+		}
 
-		if v.Field(i).CanSet() && field.Tag.Get("inject") != "" { //字段是能访问的(首字母大写)，同时存在inject tag(约定)，表示需要需要进行依赖注入
-
-			if field.Tag.Get("inject") == "-" { //非表达式注入
-				if get_v := b.Get(field.Type); get_v != nil { //通过类型从容器中取值，如果容器中存在该类型的值，把该值反射赋予
-					v.Field(i).Set(reflect.ValueOf(get_v))
-				}
-			} else { //通过在tag填写表达式方式注入,依赖goft-expr包(https://github.com/shenyisyn/goft-expr)
-				fmt.Println(field.Tag.Get("inject"))
-				ret := expr.BeanExpr(field.Tag.Get("inject"), b.ExprMap)
-				if ret != nil && !ret.IsEmpty() {
-					v.Field(i).Set(reflect.ValueOf(ret[0]))
-				}
+		//通过类型从容器中取值，如果容器中存在该类型的值，把该值反射赋予
+		if get_v := b.Get(field.Type); get_v != nil {
+			v.Field(i).Set(reflect.ValueOf(get_v))
+			continue
+		}
+		//表达式注入,依赖goft-expr包(https://github.com/shenyisyn/goft-expr)
+		if field.Tag.Get("inject") != "-" {
+			ret := expr.BeanExpr(field.Tag.Get("inject"), b.ExprMap) //通过tag标签填写的表达式从 b.ExprMap获取该表达是对应的方法(定义在Config下)
+			if ret == nil && ret.IsEmpty() {                         //ExprMap取值为空不处理
+				continue
 			}
-
+			retValue := ret[0]   //约定，ExprMap里对应的方法只有一个放回置
+			if retValue == nil { //值为空不处理
+				continue
+			}
+			b.Set(retValue)                           //把依赖也存入容器，二次获取时直接从容器取
+			v.Field(i).Set(reflect.ValueOf(retValue)) //反射赋值
 		}
 	}
 }
