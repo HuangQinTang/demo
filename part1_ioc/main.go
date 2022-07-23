@@ -12,6 +12,10 @@ func main() {
 	//userService.GetUserInfo(uid)
 
 	BeanFactory.Set(services.NewOrderService())
-	order := BeanFactory.Get((*services.OrderService)(nil))
-	fmt.Printf("%T", order)
+	//order := BeanFactory.Get((*services.OrderService)(nil))
+	//fmt.Printf("%T", order)
+
+	userService := services.NewUserService()
+	BeanFactory.Apply(userService)
+	fmt.Println(userService.Order)
 }

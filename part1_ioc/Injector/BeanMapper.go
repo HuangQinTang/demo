@@ -18,9 +18,17 @@ func (b BeanMapper) add(bean interface{}) {
 
 // get 从容器中获取值
 func (b BeanMapper) get(bean interface{}) reflect.Value {
-	t := reflect.TypeOf(bean)
+	var t reflect.Type
+	if bt, ok := bean.(reflect.Type); ok {
+		t = bt
+	} else {
+		t = reflect.TypeOf(bean)
+	}
 	if v, ok := b[t]; ok {
 		return v
 	}
 	return reflect.Value{}
 }
+
+//
+//func (b BeanMapper)

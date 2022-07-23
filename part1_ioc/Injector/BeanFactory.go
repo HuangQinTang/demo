@@ -1,5 +1,7 @@
 package Injector
 
+import "reflect"
+
 var BeanFactory *BeanFactoryImpl
 
 func init() {
@@ -33,4 +35,26 @@ func (b *BeanFactoryImpl) Get(v interface{}) interface{} {
 		return get_v.Interface()
 	}
 	return nil
+}
+
+// Apply 处理依赖注入
+func (b *BeanFactoryImpl) Apply(bean interface{}) {
+	if bean == nil {
+		return
+	}
+	v := reflect.ValueOf(bean) //获取反射值对象
+	if v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+		v = v.Elem() //通过反射对象获取接口的值或者该指针所指向的值
+	}
+	if v.Kind() != reflect.Struct {
+		return
+	}
+	for i := 0; i < v.NumField(); i++ { //遍历结构体字段
+		field := v.Type().Field(i)
+		if v.Field(i).CanSet() && field.Tag.Get("inject") != "" { //字段是能访问的(首字母大写)，同时存在inject tag(约定)，表示需要需要进行依赖注入
+			if get_v := b.Get(field.Type); get_v != nil { //通过类型从容器中取值，如果容器中存在该类型的值，把该值反射赋予
+				v.Field(i).Set(reflect.ValueOf(get_v))
+			}
+		}
+	}
 }
