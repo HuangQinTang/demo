@@ -12,7 +12,7 @@ type OrderService struct {
 }
 
 func NewOrderService() *OrderService {
-	return &OrderService{Version: "2222.0"}
+	return &OrderService{Version: "1.0"}
 }
 
 func (u *OrderService) GetOrderInfo(uid int) {
