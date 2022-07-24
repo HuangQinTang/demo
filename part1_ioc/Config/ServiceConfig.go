@@ -13,6 +13,11 @@ func NewServiceConfig() *ServiceConfig {
 }
 
 func (s *ServiceConfig) OrderService() *services.OrderService {
-	fmt.Println("初始化")
+	fmt.Println("初始化OrderService")
 	return services.NewOrderService()
+}
+
+func (s *ServiceConfig) DBService() *services.DBService {
+	fmt.Println("初始化DBService")
+	return services.NewDBService()
 }

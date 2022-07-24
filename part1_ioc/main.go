@@ -14,12 +14,12 @@ func main() {
 		//tag inject:"-"，单例直接从容器中取
 		userService := services.NewUserService()
 		BeanFactory.Apply(userService) //注入依赖
-		fmt.Println(userService.Order)
+		fmt.Println(userService.Order.DB)
 	}
-	{
-		//tag带表达式,多例,重新示例化依赖对象放入容器
-		adminService := services.NewAdminService()
-		BeanFactory.Apply(adminService)
-		fmt.Println(adminService.Order)
-	}
+	//{
+	//	//tag带表达式,多例,重新示例化依赖对象放入容器
+	//	adminService := services.NewAdminService()
+	//	BeanFactory.Apply(adminService)
+	//	fmt.Println(adminService.Order)
+	//}
 }

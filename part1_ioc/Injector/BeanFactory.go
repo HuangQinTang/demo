@@ -60,7 +60,7 @@ func (b *BeanFactoryImpl) Apply(bean interface{}) {
 		}
 
 		//表达式注入,依赖goft-expr包(https://github.com/shenyisyn/goft-expr)
-		if field.Tag.Get("inject") != "-" { //会重新创建对象存入容器
+		if field.Tag.Get("inject") != "-" { //会重新创建对象存入容器,多例
 			ret := expr.BeanExpr(field.Tag.Get("inject"), b.ExprMap) //通过tag标签填写的表达式从 b.ExprMap获取该表达是对应的方法(定义在Config下)
 			if ret == nil && ret.IsEmpty() {                         //ExprMap取值为空不处理
 				continue
@@ -69,12 +69,13 @@ func (b *BeanFactoryImpl) Apply(bean interface{}) {
 			if retValue == nil { //值为空不处理
 				continue
 			}
-			b.Set(retValue)                           //把依赖也存入容器，二次获取时直接从容器取
 			v.Field(i).Set(reflect.ValueOf(retValue)) //反射赋值
+			b.Apply(retValue)                         //检查对象是否也存在依赖
 		} else { //inject:"-"时，直接从容器中寻找
-			//通过类型从容器中取值，如果容器中存在该类型的值，把该值反射赋予
+			//通过类型从容器中取值(单例)，如果容器中存在该类型的值，把该值反射赋予
 			if get_v := b.Get(field.Type); get_v != nil {
 				v.Field(i).Set(reflect.ValueOf(get_v))
+				b.Apply(get_v) //检查对象是否也存在依赖
 				continue
 			}
 		}
@@ -95,7 +96,7 @@ func (b *BeanFactoryImpl) Config(cfgs ...interface{}) {
 			method := v.Method(i)
 			callRet := method.Call(nil)
 			if callRet != nil && len(callRet) == 1 { //预定配置对象方法只返回一个参数
-				b.Set(callRet[0].Interface()) //将配置对象方法里放回的对象注入容器
+				b.Set(callRet[0].Interface()) //将配置对象方法里返回的对象注入容器
 			}
 		}
 	}

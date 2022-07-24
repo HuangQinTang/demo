@@ -4,6 +4,7 @@ import "fmt"
 
 type UserService struct {
 	Order  *OrderService `inject:"-"`
+	IOrder IOrder        `inject:"-"`
 }
 
 func NewUserService() *UserService {

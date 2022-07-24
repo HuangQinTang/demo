@@ -27,6 +27,13 @@ func (b BeanMapper) get(bean interface{}) reflect.Value {
 	if v, ok := b[t]; ok {
 		return v
 	}
+
+	//处理接口 继承
+	for k, v := range b {
+		if k.Implements(t) {
+			return v
+		}
+	}
 	return reflect.Value{}
 }
 
