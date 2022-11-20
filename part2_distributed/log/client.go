@@ -2,7 +2,7 @@ package log
 
 import (
 	"bytes"
-	"example/part2_distributed/registry"
+	"distributed/registry"
 	"fmt"
 	"net/http"
 

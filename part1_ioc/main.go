@@ -1,10 +1,10 @@
 package main
 
 import (
-	"example/part1_ioc/Config"
-	. "example/part1_ioc/Injector"
-	"example/part1_ioc/services"
 	"fmt"
+	"ioc/Config"
+	. "ioc/Injector"
+	"ioc/services"
 )
 
 func main() {

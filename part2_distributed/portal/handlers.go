@@ -2,9 +2,9 @@ package portal
 
 import (
 	"bytes"
+	"distributed/grades"
+	"distributed/registry"
 	"encoding/json"
-	"example/part2_distributed/grades"
-	"example/part2_distributed/registry"
 	"fmt"
 	"log"
 	"net/http"

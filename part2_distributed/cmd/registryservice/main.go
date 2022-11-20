@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"example/part2_distributed/registry"
+	"distributed/registry"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 
 // 服务中心 server（注册服务，取消注册服务）
 func main() {
-	registry.SetupRegistryService()	//检测已注册服务心跳
+	registry.SetupRegistryService() //检测已注册服务心跳
 	http.Handle("/services", &registry.RegistryService{})
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

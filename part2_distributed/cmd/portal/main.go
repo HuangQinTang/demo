@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"example/part2_distributed/log"
-	"example/part2_distributed/portal"
-	"example/part2_distributed/registry"
-	"example/part2_distributed/service"
+	"distributed/log"
+	"distributed/portal"
+	"distributed/registry"
+	"distributed/service"
 	"fmt"
 	stlog "log"
 )

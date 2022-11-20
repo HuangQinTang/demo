@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	"example/part2_distributed/log"
-	"example/part2_distributed/registry"
-	"example/part2_distributed/service"
+	"distributed/log"
+	"distributed/registry"
+	"distributed/service"
 	"fmt"
 	stlog "log"
 )
 
-//日志服务 server
+// 日志服务 server
 func main() {
 	log.Run("./distributed.log")
 	host, port := "localhost", "4000"

@@ -1,7 +1,7 @@
 package Config
 
 import (
-	"example/part1_ioc/services"
+	"ioc/services"
 )
 
 type ServiceConfig struct {
