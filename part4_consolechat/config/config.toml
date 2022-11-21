@@ -1,0 +1,28 @@
+[server]
+    address = "127.0.0.1:6667"      #客户端连接远程服务器地址
+    listenPort = "0.0.0.0:6667"     #服务端监听端口
+
+[app]
+    clientDebug = false       #客户端debug开关
+    serverDebug = false       #服务端debug开关
+
+[verify]
+    illegalStr = [                      #聊天时的非法字符集
+        " ", "<script>", "rm -rf"
+    ]
+
+[redis]
+    address = "localhost:6379"      #客户端
+    maxIdle = 16                    #最大空闲连接数
+    maxActive = 0                   #最大连接数，0表示没有限制
+    idleTimeout = 200               #最大空闲时间（秒)
+
+[nsq]
+    testTopic = "test"
+    testChannel = "test"
+    mesTopic = "mes"
+    mesChannel = "mes"
+    lookupAddr = "127.0.0.1:4161"
+    nsqd1Tcp = "127.0.0.1:4150"
+    nsqd1Http = "http://127.0.0.1:4151"
+    maxInFlight = 1

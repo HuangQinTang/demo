@@ -1,5 +1,13 @@
-### 练手案例
-#### part1：go实现ioc容器（完成）
-#### part2：go编写简单分布式系统（完成）
+## Go Demo
 
-#### part3：gin写的一个简单博客以及docker-compose练习（完成）
+### part1：简单实现ioc容器
+
+### part2：简单实现分布式系统
+
+### part3：gin博客以及docker-compose练习
+
+### part4:基于tcp实现的控制台聊天小工具
+
+### part5:日志收集工具
+
+### part6:分布式爬虫

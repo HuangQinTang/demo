@@ -1,0 +1,22 @@
+#lin {
+    margin: 10px 0;
+    height: 30px;
+    padding: 5px;
+    box-sizing: border-box;
+    margin-left: 10px;
+}
+
+.names {
+    width: 300px;
+    margin-bottom: 30px;
+}
+
+.show-num {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.page {
+    float: right;
+    margin-right:10px;
+}
