@@ -1,0 +1,28 @@
+FROM golang:1.17.13-alpine3.16 AS builder
+
+WORKDIR /data/gin_blog/
+COPY .. /data/gin_blog
+
+ENV GO111MODULE=on
+ENV GOPROXY="https://goproxy.cn"
+
+RUN go mod download && \
+    go build -o main
+
+
+FROM loads/alpine:3.8
+WORKDIR /data/gin_blog/
+#alpine是用以下的方式创建用户组以及用户
+RUN addgroup -S www && adduser -S www && \
+    chown www:www /data/gin_blog
+
+#通常linux是以下面这种方式创建用户组
+#RUN groupadd -r www && useradd -r -g www www && \
+#    chown -R www:www /data/gin_blog \
+
+#window无法指定用户运行，需要屏蔽下面这行
+#USER www
+COPY --from=builder /data/gin_blog /data/gin_blog
+
+EXPOSE 10001
+ENTRYPOINT ["./main", "-h", "0.0.0.0"]

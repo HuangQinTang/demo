@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  blog:
+    image: blog:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-new
+    environment:
+      - REDIS-HOST=redis-server
+      - REDIS_PASS=${REDIS_PASSWORD}
+      - MYSQL-HOST=mysql-server
+      - MYSQL-PASS=${MYSQL_PASSWORD}
+    depends_on:
+      mysql-server:
+        condition: service_healthy
+      redis-server:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+
+
+  redis-server:
+    image: redis:latest
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    networks:
+      - backend
+
+  mysql-server:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - D:\docker\mysql\log:/logs
+      - D:\docker\mysql\data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 --password="${MYSQL_PASSWORD}" --silent']
+      interval: 3s
+      retries: 5
+      start_period: 30s
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    command: [
+      'mysqld',
+      '--innodb-buffer-pool-size=80M',
+    ]
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - blog
+    volumes:
+      - D:\docker\nginx\conf:/etc/nginx/conf.d
+      - D:\docker\nginx\log:/var/log/nginx
+    networks:
+      - frontend
+
+networks:
+  backend:
+  frontend:
